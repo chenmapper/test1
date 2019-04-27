@@ -1,0 +1,46 @@
+#1080426泛亞新聞網爬蟲
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup as bs
+import json
+url_0='https://fanyalive.shop2000.com.tw'
+pg=2
+d1=[];d2=[];d3=[];d4=[];d5=[];d6=[]#頁數 編號 分類 標題 網址 內文
+for pg in range(1,19):
+    key='/product/447127&p='+str(pg)#警政新聞
+    url_1=url_0+key
+    res=requests.get(url_1)
+    print(url_1)
+    print(res)
+    soup=bs(res.text,"lxml")
+    s1=soup.find_all('td',class_='p_td')
+    ce=0
+    for s2 in s1:
+        s3=s2.find_all('li')
+        tt=''    
+        for s4 in s3:
+            ce+=1
+            d1.append(pg)#頁數
+            d2.append(ce)#編號 
+            print(s4.text)
+            d4.append(s4.text)#標題
+            print(s4.a['href'])        
+            url_2=url_0+s4.a['href']
+            res2=requests.get(url_2)
+            print(url_2)
+            d5.append(url_2)#網址
+            print(res2)
+            soup2=bs(res2.text,"lxml") 
+            t0=soup2.find('td',class_='p_tiem').text
+            d3.append(t0)#分類
+            print(t0)
+            s5=soup2.find_all('font',size="4")
+            for s6 in s5:            
+                tt=tt+s6.text.replace('\n','').strip()+'_'        
+            d6.append(tt)#內文
+            tt='' 
+df=pd.DataFrame([d1,d2,d3,d4,d5,d6]).T
+fn=r'C:\Users\acer\Desktop\泛亞新聞網爬蟲.xlsx'
+df.to_excel(fn)
+print(fn,len(df))
+
