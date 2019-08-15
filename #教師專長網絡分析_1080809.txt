@@ -1,0 +1,43 @@
+﻿#mapper的networkx世界_1080810社會科學、新聞學及圖書資訊的教師專長網絡分析2
+import matplotlib.pyplot as plt
+import networkx as nx
+import pandas as pd
+import jieba
+%pylab 
+fn1=r'C:\LDA\文本\106學年度大學校院教師學術專長彙整表-df.xlsx'
+df1=pd.read_excel(fn1,encoding='utf-8')
+df1.tail(2)
+df2=df1[['學校名稱','教育部統計處領域代碼','聘書職級','教師專長']].copy()
+df2=df2[[str(x)=='03' for x in df2.教育部統計處領域代碼]].copy()
+df2['p1']=df2['教師專長']
+df2['p1']=[str(x).replace(' ','、').replace(',','、').replace(';','、').replace('.','、') for x in df2.p1]
+df3=df2[[len(x.split('、'))>1 for x in df2.p1]].copy()
+d1=[x.split('、') for x in df3.p1]
+keys=['經濟','政治','心理','國際','行為','發展','管理','新聞','圖書','金融']
+z=randn(len(d1),10);z[:]=0
+zz=randn(10,10);zz[:]=0
+for ii in range(len(d1)):
+    for aa in range(len(keys)):
+        for bb in range(aa+1,len(keys)):
+            if str(d1[ii]).find(keys[aa])>-1 and str(d1[ii]).find(keys[bb])>-1:
+                zz[aa,bb]+=1        
+    for ddd in d1[ii]:
+        for jj in range(len(keys)):
+            if ddd.find(keys[jj])>-1:
+                z[ii,jj]+=1
+nodes=[]
+for jj in range(len(keys)):
+    nodes.append(z[:,jj].sum())
+nodes
+#畫圖
+G = nx.Graph()
+widths=[];r=zz.max()
+for i in range(len(zz)):
+    for j in range(len(zz)):
+        if zz[i,j]>0:
+            G.add_edge(keys[i],keys[j],da=1)
+            widths.append(int(zz[i,j]/r*5)+1)
+pos = nx.circular_layout(G)#節點在一個圓環均匀分布
+plt.title('社會科學、新聞學及圖書資訊的教師專長網絡分析_1080809')
+nx.draw(G,pos,node_size=nodes,width=widths,alpha=0.5,edge_color='g',with_labels=True,node_color=range(10),cmap=plt.cm.Reds)
+print(len(nodes))
